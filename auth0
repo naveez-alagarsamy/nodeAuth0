@@ -1,0 +1,50 @@
+const http = require('http');
+const express = require('express');
+
+var router = require('express').Router();
+const { auth } = require('express-openid-connect');
+const app = express();
+app.use('/', router);
+
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+http.createServer(app)
+  .listen(port, () => {
+    console.log(`Listening on `);
+  });
+
+
+
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: 'a long, randomly-generated string stored in env',
+  baseURL: 'http://localhost:3000',
+  clientID: 'QxpAXsXkzy0Vm2VdT6dFFS0VOKdrah67',
+  issuerBaseURL: 'https://dev-bnga041p.us.auth0.com'
+};
+console.log(config)
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
+
+// req.isAuthenticated is provided from the auth router
+app.get('/', (req, res) => {
+console.log('entering au')
+  res.send(req.oidc.isAuthenticated() ? 'Logged in your App' : 'Logged out from App');
+});
+
+//add this to validate routes for authentication it used the same express-openid-connect as ///above for auth
+const { requiresAuth } = require('express-openid-connect');
+
+app.get('/profile', requiresAuth(), (req, res) => {
+
+  res.send(JSON.stringify(req.oidc.user));
+});
+
+
+
+
+
